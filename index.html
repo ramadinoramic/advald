@@ -331,7 +331,14 @@
           </ul>
         </div>
 
-        <form class="contact-form reveal" id="contactForm" novalidate>
+        <form class="contact-form reveal" id="contactForm" name="contact" method="POST"
+              data-netlify="true" netlify-honeypot="bot-field" action="/?submitted=1" novalidate>
+          <!-- Netlify Forms: required so submissions are attributed to this form -->
+          <input type="hidden" name="form-name" value="contact" />
+          <!-- Honeypot: real users never see/fill this; bots that do are dropped -->
+          <p class="hp-field" hidden aria-hidden="true">
+            <label>Don't fill this out if you're human: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+          </p>
           <div class="field">
             <label for="name">Name</label>
             <input type="text" id="name" name="name" autocomplete="name" required />
