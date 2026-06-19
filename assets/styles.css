@@ -147,7 +147,8 @@ img { max-width: 100%; display: block; }
   background: radial-gradient(circle, var(--accent-soft), transparent 70%);
   top: -150px; right: -120px; filter: blur(20px); pointer-events: none;
 }
-.hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(30px, 5vw, 64px); align-items: center; position: relative; }
+.hero-grid { display: grid; grid-template-columns: 1fr; gap: clamp(30px, 5vw, 64px); align-items: center; position: relative; z-index: 1; }
+.hero-copy { max-width: 760px; }
 .hero-title { font-size: clamp(40px, 6.5vw, 76px); font-weight: 800; }
 .hero-sub { margin-top: 22px; font-size: clamp(16px, 2vw, 20px); color: var(--gray-400); max-width: 52ch; }
 .hero-cta { margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap; }
@@ -155,39 +156,17 @@ img { max-width: 100%; display: block; }
 .hero-trust strong { font-family: var(--font-display); font-size: 30px; color: var(--white); display: block; }
 .hero-trust span { font-size: 14px; color: var(--gray-400); }
 
-/* Animated mesh visual */
-.hero-visual { position: relative; }
-.mesh-stage {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  width: 100%;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background:
-    radial-gradient(120% 120% at 70% 20%, rgba(200,255,77,.10), transparent 55%),
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
-  border: 1px solid rgba(255,255,255,.1);
-  box-shadow: var(--shadow);
+/* Animated mesh — full-bleed hero background behind the content */
+.hero-mesh {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: block; z-index: 0; pointer-events: none;
+  opacity: .28;
+  /* fade the mesh out toward the bottom so it sits quietly behind text */
+  -webkit-mask-image: radial-gradient(130% 100% at 70% 30%, #000 35%, transparent 92%);
+          mask-image: radial-gradient(130% 100% at 70% 30%, #000 35%, transparent 92%);
 }
-.mesh-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
-/* Decorative orbit rings behind/around the mesh */
-.mesh-orbit {
-  position: absolute; top: 50%; left: 50%; width: 78%; aspect-ratio: 1;
-  transform: translate(-50%, -50%); border-radius: 50%;
-  border: 1px solid rgba(200,255,77,.14); pointer-events: none;
-  animation: orbitSpin 26s linear infinite;
-}
-.mesh-orbit::after {
-  content: ''; position: absolute; top: -4px; left: 50%; width: 8px; height: 8px;
-  border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px 2px var(--accent);
-  transform: translateX(-50%);
-}
-.mesh-orbit-2 { width: 52%; border-color: rgba(90,209,255,.16); animation-duration: 18s; animation-direction: reverse; }
-.mesh-orbit-2::after { background: #5ad1ff; box-shadow: 0 0 12px 2px #5ad1ff; }
-@keyframes orbitSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
-
-.logo-strip { margin-top: 60px; display: flex; flex-wrap: wrap; gap: 14px 34px; align-items: center; justify-content: center; opacity: .6; }
+.logo-strip { position: relative; z-index: 1; margin-top: 60px; display: flex; flex-wrap: wrap; gap: 14px 34px; align-items: center; justify-content: center; opacity: .6; }
 .logo-strip span { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--gray-200); }
 
 /* ---------- Sections ---------- */
@@ -332,14 +311,12 @@ img { max-width: 100%; display: block; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; transition: none; }
-  .mesh-orbit { animation: none; }
   * { transition-duration: .01ms !important; }
 }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 960px) {
-  .hero-grid, .tracking-grid, .contact-grid { grid-template-columns: 1fr; }
-  .hero-visual { order: -1; max-width: 520px; }
+  .tracking-grid, .contact-grid { grid-template-columns: 1fr; }
   .nav-links { display: none; }
   .nav-toggle { display: flex; }
   .mobile-menu { display: flex; }

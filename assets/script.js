@@ -135,8 +135,8 @@
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      // Node count scales with area, capped for performance (denser mesh)
-      const count = Math.max(40, Math.min(104, Math.round((w * h) / 5400)));
+      // Node count scales with area, capped for performance (full-bleed background)
+      const count = Math.max(48, Math.min(140, Math.round((w * h) / 6500)));
       nodes = Array.from({ length: count }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
