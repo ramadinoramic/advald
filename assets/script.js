@@ -119,7 +119,9 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (canvas && canvas.getContext) {
     const ctx = canvas.getContext('2d');
-    const ACCENT = 'rgba(200, 255, 77, ALPHA)';
+    // Two-tone palette: lime accent + electric blue. ALPHA is swapped per draw.
+    const LIME = 'rgba(200, 255, 77, ALPHA)';
+    const BLUE = 'rgba(90, 209, 255, ALPHA)';
     let w = 0, h = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
     let nodes = [];
     let raf = null;
@@ -133,18 +135,20 @@
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      // Node count scales with area, capped for performance
-      const count = Math.max(26, Math.min(64, Math.round((w * h) / 9000)));
+      // Node count scales with area, capped for performance (denser mesh)
+      const count = Math.max(40, Math.min(104, Math.round((w * h) / 5400)));
       nodes = Array.from({ length: count }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
         vx: (Math.random() - 0.5) * 0.35,
         vy: (Math.random() - 0.5) * 0.35,
-        r: Math.random() * 1.6 + 1
+        r: Math.random() * 1.6 + 1,
+        // ~1 in 3 nodes are blue, the rest lime
+        c: Math.random() < 0.34 ? BLUE : LIME
       }));
     };
 
-    const LINK = 118; // px distance to draw a connecting line
+    const LINK = 132; // px distance to draw a connecting line
 
     const draw = () => {
       ctx.clearRect(0, 0, w, h);
@@ -169,19 +173,20 @@
 
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx.fillStyle = ACCENT.replace('ALPHA', '0.9');
+        ctx.fillStyle = n.c.replace('ALPHA', '0.9');
         ctx.fill();
       }
 
-      // Draw links
+      // Draw links — a link tinted blue if either endpoint is blue, else lime
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i], b = nodes[j];
           const dx = a.x - b.x, dy = a.y - b.y;
           const dist = Math.hypot(dx, dy);
           if (dist < LINK) {
-            const alpha = (1 - dist / LINK) * 0.5;
-            ctx.strokeStyle = ACCENT.replace('ALPHA', alpha.toFixed(3));
+            const alpha = (1 - dist / LINK) * 0.45;
+            const tint = (a.c === BLUE || b.c === BLUE) ? BLUE : LIME;
+            ctx.strokeStyle = tint.replace('ALPHA', alpha.toFixed(3));
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
