@@ -31,6 +31,8 @@
       navToggle.setAttribute('aria-expanded', String(open));
     });
     mobileMenu.querySelectorAll('a').forEach((a) => a.addEventListener('click', closeMenu));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 960) closeMenu(); });
   }
 
   /* ---- Scroll reveal ---- */
@@ -302,14 +304,18 @@
 
     // The canvas is a non-interactive background, so listen on the hero itself.
     const heroEl = canvas.closest('.hero') || canvas.parentElement;
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (heroEl) {
-      heroEl.addEventListener('pointermove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        pointer.x = e.clientX - rect.left;
-        pointer.y = e.clientY - rect.top;
-        pointer.active = true;
-      });
-      heroEl.addEventListener('pointerleave', () => { pointer.active = false; pointer.x = pointer.y = -999; });
+      // Pointer attraction only on hover-capable devices (skips touch to save mobile CPU)
+      if (finePointer) {
+        heroEl.addEventListener('pointermove', (e) => {
+          const rect = canvas.getBoundingClientRect();
+          pointer.x = e.clientX - rect.left;
+          pointer.y = e.clientY - rect.top;
+          pointer.active = true;
+        });
+        heroEl.addEventListener('pointerleave', () => { pointer.active = false; pointer.x = pointer.y = -999; });
+      }
 
       // A click anywhere in the hero fires a ripple from the nearest node
       heroEl.addEventListener('click', (e) => {
