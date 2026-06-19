@@ -94,79 +94,12 @@
           </div>
         </div>
 
-        <!-- Dashboard visual -->
-        <div class="hero-visual reveal" aria-label="Campaign performance dashboard">
-          <div class="dash">
-            <div class="dash-top">
-              <div class="dash-title">
-                <span class="dash-dot"></span> Live Campaign Dashboard
-              </div>
-              <div class="dash-window">
-                <span></span><span></span><span></span>
-              </div>
-            </div>
-
-            <div class="dash-kpis">
-              <div class="kpi">
-                <span class="kpi-label">Spend</span>
-                <span class="kpi-value">€48,210</span>
-                <span class="kpi-trend up">▲ 8.2%</span>
-              </div>
-              <div class="kpi">
-                <span class="kpi-label">Clicks</span>
-                <span class="kpi-value">312,940</span>
-                <span class="kpi-trend up">▲ 14%</span>
-              </div>
-              <div class="kpi">
-                <span class="kpi-label">Conversions</span>
-                <span class="kpi-value">6,418</span>
-                <span class="kpi-trend up">▲ 11%</span>
-              </div>
-              <div class="kpi">
-                <span class="kpi-label">CPA</span>
-                <span class="kpi-value">€7.51</span>
-                <span class="kpi-trend down">▼ 19%</span>
-              </div>
-              <div class="kpi">
-                <span class="kpi-label">ROAS</span>
-                <span class="kpi-value">4.7x</span>
-                <span class="kpi-trend up">▲ 0.6x</span>
-              </div>
-              <div class="kpi">
-                <span class="kpi-label">FTDs</span>
-                <span class="kpi-value">1,204</span>
-                <span class="kpi-trend up">▲ 9%</span>
-              </div>
-            </div>
-
-            <div class="dash-chart">
-              <div class="dash-chart-head">
-                <span>Revenue vs. Spend</span>
-                <span class="muted">Last 30 days</span>
-              </div>
-              <div class="bars" aria-hidden="true">
-                <span style="--h:38%"></span><span style="--h:52%"></span><span style="--h:44%"></span>
-                <span style="--h:61%"></span><span style="--h:57%"></span><span style="--h:72%"></span>
-                <span style="--h:68%"></span><span style="--h:81%"></span><span style="--h:76%"></span>
-                <span style="--h:90%"></span><span style="--h:84%"></span><span style="--h:97%"></span>
-              </div>
-            </div>
-
-            <div class="dash-sources">
-              <div class="dash-chart-head"><span>Traffic Source Performance</span></div>
-              <ul class="src-list">
-                <li><span>Paid Social</span><div class="meter"><i style="--w:88%"></i></div><b>€18.2k</b></li>
-                <li><span>Paid Search</span><div class="meter"><i style="--w:74%"></i></div><b>€14.9k</b></li>
-                <li><span>Native</span><div class="meter"><i style="--w:58%"></i></div><b>€8.6k</b></li>
-                <li><span>Affiliates</span><div class="meter"><i style="--w:46%"></i></div><b>€6.5k</b></li>
-              </ul>
-            </div>
-
-            <div class="dash-foot">
-              <span class="pill">Signups 9,820</span>
-              <span class="pill">Revenue €226k</span>
-              <span class="pill pill-accent">Profit ↑</span>
-            </div>
+        <!-- Animated mesh visual -->
+        <div class="hero-visual reveal" aria-hidden="true">
+          <div class="mesh-stage">
+            <canvas id="meshCanvas" class="mesh-canvas"></canvas>
+            <span class="mesh-orbit"></span>
+            <span class="mesh-orbit mesh-orbit-2"></span>
           </div>
         </div>
       </div>

@@ -113,4 +113,115 @@
 
     form.querySelector('#name').addEventListener('input', (e) => e.target.classList.remove('invalid'));
   }
+
+  /* ---- Animated particle mesh (hero visual) ---- */
+  const canvas = document.getElementById('meshCanvas');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (canvas && canvas.getContext) {
+    const ctx = canvas.getContext('2d');
+    const ACCENT = 'rgba(200, 255, 77, ALPHA)';
+    let w = 0, h = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let nodes = [];
+    let raf = null;
+    const pointer = { x: -999, y: -999, active: false };
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      w = rect.width; h = rect.height;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Node count scales with area, capped for performance
+      const count = Math.max(26, Math.min(64, Math.round((w * h) / 9000)));
+      nodes = Array.from({ length: count }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        r: Math.random() * 1.6 + 1
+      }));
+    };
+
+    const LINK = 118; // px distance to draw a connecting line
+
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+
+      // Update + draw nodes
+      for (const n of nodes) {
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > w) n.vx *= -1;
+        if (n.y < 0 || n.y > h) n.vy *= -1;
+
+        // Gentle pull toward the pointer for interactivity
+        if (pointer.active) {
+          const dx = pointer.x - n.x, dy = pointer.y - n.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < 14000 && d2 > 1) {
+            const f = 0.0012;
+            n.vx += dx * f; n.vy += dy * f;
+          }
+        }
+        // Damping so velocities stay calm
+        n.vx *= 0.99; n.vy *= 0.99;
+
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = ACCENT.replace('ALPHA', '0.9');
+        ctx.fill();
+      }
+
+      // Draw links
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < LINK) {
+            const alpha = (1 - dist / LINK) * 0.5;
+            ctx.strokeStyle = ACCENT.replace('ALPHA', alpha.toFixed(3));
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+      raf = requestAnimationFrame(draw);
+    };
+
+    const start = () => { if (!raf && !reduceMotion) raf = requestAnimationFrame(draw); };
+    const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = null; } };
+
+    resize();
+    if (reduceMotion) {
+      draw(); // render a single static frame
+    } else {
+      start();
+    }
+
+    // Pause when offscreen to save CPU
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        entries.forEach((e) => (e.isIntersecting ? start() : stop()));
+      }, { threshold: 0.05 }).observe(canvas);
+    }
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 150);
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = e.clientX - rect.left;
+      pointer.y = e.clientY - rect.top;
+      pointer.active = true;
+    });
+    canvas.addEventListener('pointerleave', () => { pointer.active = false; pointer.x = pointer.y = -999; });
+  }
 })();
