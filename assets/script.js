@@ -83,35 +83,64 @@
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-  /* ---- Contact form (front-end demo handling) ---- */
+  /* ---- Contact form: AJAX submit to Netlify Forms ---- */
   const form = document.getElementById('contactForm');
   const status = document.getElementById('formStatus');
   if (form) {
-    form.addEventListener('submit', (e) => {
+    const setStatus = (msg, error) => {
+      if (!status) return;
+      status.style.color = error ? '#ff8585' : '';
+      status.textContent = msg;
+    };
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = form.querySelector('#name');
-      let valid = true;
+      const submitBtn = form.querySelector('button[type="submit"]');
 
+      // Minimal client-side validation
       if (!name.value.trim()) {
         name.classList.add('invalid');
-        valid = false;
-      } else {
-        name.classList.remove('invalid');
-      }
-
-      if (!valid) {
-        if (status) { status.style.color = '#ff8585'; status.textContent = 'Please add your name so we can reply.'; }
+        name.focus();
+        setStatus('Please add your name so we can reply.', true);
         return;
       }
+      name.classList.remove('invalid');
 
-      if (status) {
-        status.style.color = '';
-        status.textContent = 'Thanks — your request was received. We’ll reply within one business day.';
+      // Encode all fields (incl. hidden form-name) for Netlify Forms
+      const data = new FormData(form);
+      const body = new URLSearchParams(data).toString();
+
+      submitBtn.disabled = true;
+      const originalLabel = submitBtn.textContent;
+      submitBtn.textContent = 'Sending…';
+      setStatus('Sending your request…');
+
+      try {
+        const res = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body
+        });
+        if (!res.ok) throw new Error('Request failed: ' + res.status);
+        form.reset();
+        setStatus('Thanks — your request was received. We’ll reply within one business day.');
+      } catch (err) {
+        // Fallback: let the browser do a native (non-AJAX) submit to Netlify
+        setStatus('Network hiccup — submitting the usual way…', true);
+        form.submit();
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalLabel;
       }
-      form.reset();
     });
 
     form.querySelector('#name').addEventListener('input', (e) => e.target.classList.remove('invalid'));
+
+    // Show confirmation when Netlify redirects back with ?submitted=1 (no-JS path)
+    if (new URLSearchParams(location.search).get('submitted') === '1') {
+      setStatus('Thanks — your request was received. We’ll reply within one business day.');
+    }
   }
 
   /* ---- Animated particle mesh (hero visual) ---- */
