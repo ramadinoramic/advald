@@ -20,9 +20,10 @@
   --ink: #0c1322;
 
   /* Accent */
-  --accent: #c8ff4d;
-  --accent-600: #aef000;
-  --accent-soft: rgba(200, 255, 77, 0.14);
+  /* Accent — Advald brand teal (from logo gradient) */
+  --accent: #1fb39a;
+  --accent-600: #14917e;
+  --accent-soft: rgba(31, 179, 154, 0.14);
 
   /* Tokens */
   --radius: 16px;
@@ -79,7 +80,7 @@ img { max-width: 100%; display: block; }
 }
 .btn-sm { padding: 10px 18px; font-size: 15px; }
 .btn-block { width: 100%; }
-.btn-primary { background: var(--accent); color: var(--navy-900); box-shadow: 0 10px 24px -10px rgba(200,255,77,.6); }
+.btn-primary { background: var(--accent); color: #04201c; box-shadow: 0 10px 24px -10px rgba(31,179,154,.6); }
 .btn-primary:hover { background: var(--accent-600); transform: translateY(-2px); }
 .btn-ghost { background: transparent; color: inherit; border-color: var(--gray-200); }
 .btn-ghost:hover { border-color: var(--ink); transform: translateY(-2px); }

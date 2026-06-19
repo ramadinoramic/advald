@@ -119,13 +119,20 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (canvas && canvas.getContext) {
     const ctx = canvas.getContext('2d');
-    // Two-tone palette: lime accent + electric blue. ALPHA is swapped per draw.
-    const LIME = 'rgba(200, 255, 77, ALPHA)';
-    const BLUE = 'rgba(90, 209, 255, ALPHA)';
+    // Two-tone palette in the Advald brand teal family. ALPHA is swapped per draw.
+    const TEAL = 'rgba(31, 179, 154, ALPHA)';   // brand teal (matches --accent)
+    const AQUA = 'rgba(64, 224, 200, ALPHA)';   // brighter aqua highlight
     let w = 0, h = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
     let nodes = [];
+    let pulses = [];          // expanding rings = "clicks" rippling through the network
+    let lastPulse = 0;
     let raf = null;
     const pointer = { x: -999, y: -999, active: false };
+
+    const LINK = 132;             // px distance to draw a connecting line
+    const PULSE_EVERY = 720;      // ms between auto-fired clicks
+    const PULSE_SPEED = 1.7;      // px per frame the ring expands
+    const PULSE_MAX = LINK * 2.4; // ring lifespan in px
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -143,17 +150,29 @@
         vx: (Math.random() - 0.5) * 0.35,
         vy: (Math.random() - 0.5) * 0.35,
         r: Math.random() * 1.6 + 1,
-        // ~1 in 3 nodes are blue, the rest lime
-        c: Math.random() < 0.34 ? BLUE : LIME
+        glow: 0,
+        // ~1 in 3 nodes are the brighter aqua, the rest brand teal
+        c: Math.random() < 0.34 ? AQUA : TEAL
       }));
     };
 
-    const LINK = 132; // px distance to draw a connecting line
+    // Fire a "click" from a node: a ripple that travels the network toward action
+    const firePulse = (node) => {
+      const n = node || nodes[(Math.random() * nodes.length) | 0];
+      if (n) pulses.push({ x: n.x, y: n.y, r: 0, c: n.c });
+    };
 
-    const draw = () => {
+    const draw = (ts) => {
+      ts = ts || 0;
       ctx.clearRect(0, 0, w, h);
 
-      // Update + draw nodes
+      // Auto-fire clicks on an interval
+      if (!reduceMotion && ts - lastPulse > PULSE_EVERY && pulses.length < 6) {
+        firePulse();
+        lastPulse = ts;
+      }
+
+      // Move nodes + reset their glow for this frame
       for (const n of nodes) {
         n.x += n.vx; n.y += n.vy;
         if (n.x < 0 || n.x > w) n.vx *= -1;
@@ -168,16 +187,30 @@
             n.vx += dx * f; n.vy += dy * f;
           }
         }
-        // Damping so velocities stay calm
-        n.vx *= 0.99; n.vy *= 0.99;
-
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx.fillStyle = n.c.replace('ALPHA', '0.9');
-        ctx.fill();
+        n.vx *= 0.99; n.vy *= 0.99; // damping keeps it calm
+        n.glow = 0;
       }
 
-      // Draw links — a link tinted blue if either endpoint is blue, else lime
+      // Update + draw pulses; light up nodes the ring is currently crossing
+      for (let p = pulses.length - 1; p >= 0; p--) {
+        const pl = pulses[p];
+        pl.r += PULSE_SPEED;
+        const life = 1 - pl.r / PULSE_MAX;
+        if (life <= 0) { pulses.splice(p, 1); continue; }
+
+        for (const n of nodes) {
+          const ring = Math.abs(Math.hypot(n.x - pl.x, n.y - pl.y) - pl.r);
+          if (ring < 10) n.glow = Math.max(n.glow, life);
+        }
+
+        ctx.beginPath();
+        ctx.arc(pl.x, pl.y, pl.r, 0, Math.PI * 2);
+        ctx.strokeStyle = pl.c.replace('ALPHA', (life * 0.45).toFixed(3));
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+      }
+
+      // Draw links — tinted aqua if either endpoint is aqua, else teal
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i], b = nodes[j];
@@ -185,7 +218,7 @@
           const dist = Math.hypot(dx, dy);
           if (dist < LINK) {
             const alpha = (1 - dist / LINK) * 0.45;
-            const tint = (a.c === BLUE || b.c === BLUE) ? BLUE : LIME;
+            const tint = (a.c === AQUA || b.c === AQUA) ? AQUA : TEAL;
             ctx.strokeStyle = tint.replace('ALPHA', alpha.toFixed(3));
             ctx.lineWidth = 1;
             ctx.beginPath();
@@ -195,6 +228,23 @@
           }
         }
       }
+
+      // Draw nodes last, brightening any the pulse is passing through
+      for (const n of nodes) {
+        const r = n.r + n.glow * 2.6;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = n.c.replace('ALPHA', (0.6 + n.glow * 0.4).toFixed(3));
+        ctx.fill();
+        if (n.glow > 0.04) {
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, r + 3, 0, Math.PI * 2);
+          ctx.strokeStyle = n.c.replace('ALPHA', (n.glow * 0.4).toFixed(3));
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+
       raf = requestAnimationFrame(draw);
     };
 
@@ -203,7 +253,7 @@
 
     resize();
     if (reduceMotion) {
-      draw(); // render a single static frame
+      draw(0); // render a single static frame
     } else {
       start();
     }
@@ -221,12 +271,29 @@
       resizeTimer = setTimeout(resize, 150);
     });
 
-    canvas.addEventListener('pointermove', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      pointer.x = e.clientX - rect.left;
-      pointer.y = e.clientY - rect.top;
-      pointer.active = true;
-    });
-    canvas.addEventListener('pointerleave', () => { pointer.active = false; pointer.x = pointer.y = -999; });
+    // The canvas is a non-interactive background, so listen on the hero itself.
+    const heroEl = canvas.closest('.hero') || canvas.parentElement;
+    if (heroEl) {
+      heroEl.addEventListener('pointermove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        pointer.x = e.clientX - rect.left;
+        pointer.y = e.clientY - rect.top;
+        pointer.active = true;
+      });
+      heroEl.addEventListener('pointerleave', () => { pointer.active = false; pointer.x = pointer.y = -999; });
+
+      // A click anywhere in the hero fires a ripple from the nearest node
+      heroEl.addEventListener('click', (e) => {
+        if (reduceMotion || !nodes.length) return;
+        const rect = canvas.getBoundingClientRect();
+        const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+        let nearest = nodes[0], best = Infinity;
+        for (const n of nodes) {
+          const d = (n.x - cx) ** 2 + (n.y - cy) ** 2;
+          if (d < best) { best = d; nearest = n; }
+        }
+        firePulse(nearest);
+      });
+    }
   }
 })();
