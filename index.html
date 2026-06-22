@@ -73,12 +73,12 @@
   <main id="main">
     <!-- ===================== HERO ===================== -->
     <section class="hero" id="hero">
-      <canvas id="meshCanvas" class="hero-mesh" aria-hidden="true"></canvas>
+      <canvas class="hero-mesh" data-mesh aria-hidden="true"></canvas>
       <div class="hero-glow" aria-hidden="true"></div>
       <div class="container hero-grid">
         <div class="hero-copy reveal">
           <span class="eyebrow">Performance Media Buying Agency</span>
-          <h1 class="hero-title">Media Buying<br /><span class="accent-text">Built for Scale</span></h1>
+          <h1 class="hero-title">Media Buying<br /><span class="accent-text">Built for <span id="typeWord" class="type-word">Scale</span><span class="type-caret" aria-hidden="true"></span></span></h1>
           <p class="hero-sub">
             Advald helps brands acquire users through paid media, affiliate traffic,
             performance campaigns, and full-funnel tracking across every major traffic source.
@@ -205,30 +205,20 @@
     </section>
 
     <!-- ===================== SECTION 4: TRACKING & REPORTING ===================== -->
-    <section class="section section-dark" id="tracking">
-      <div class="container tracking-grid">
-        <div class="reveal">
-          <span class="eyebrow">Tracking &amp; Reporting</span>
-          <h2 class="section-title">We track the full acquisition path</h2>
-          <p class="section-lead">
-            Advald tracks every step from impression and click to signup, deposit, purchase, lead,
-            revenue, retention, and ROAS — so every decision is backed by clean data.
-          </p>
-          <div class="track-tags">
-            <span>UTM tracking</span><span>Server-side tracking</span><span>Pixel tracking</span>
-            <span>Affiliate tracking</span><span>Postback tracking</span><span>CRM tracking</span>
-            <span>Google Analytics 4</span><span>Looker Studio</span><span>Custom dashboards</span>
-            <span>Cost tracking</span><span>Conversion quality reports</span>
-          </div>
-        </div>
-
-        <div class="funnel reveal" aria-label="Acquisition funnel">
-          <div class="funnel-row"><span>Impressions</span><b>2.4M</b></div>
-          <div class="funnel-row"><span>Clicks</span><b>312,940</b></div>
-          <div class="funnel-row"><span>Signups</span><b>9,820</b></div>
-          <div class="funnel-row"><span>Deposits / Purchases</span><b>6,418</b></div>
-          <div class="funnel-row"><span>Revenue</span><b>€226,400</b></div>
-          <div class="funnel-row funnel-accent"><span>ROAS</span><b>4.7x</b></div>
+    <section class="section section-dark section-mesh" id="tracking">
+      <canvas class="hero-mesh track-mesh" data-mesh aria-hidden="true"></canvas>
+      <div class="container track-wrap reveal">
+        <span class="eyebrow">Tracking &amp; Reporting</span>
+        <h2 class="section-title">We track the full acquisition path</h2>
+        <p class="section-lead">
+          Advald tracks every step from impression and click to signup, deposit, purchase, lead,
+          revenue, retention, and ROAS — so every decision is backed by clean data.
+        </p>
+        <div class="track-tags">
+          <span>UTM tracking</span><span>Server-side tracking</span><span>Pixel tracking</span>
+          <span>Affiliate tracking</span><span>Postback tracking</span><span>CRM tracking</span>
+          <span>Google Analytics 4</span><span>Looker Studio</span><span>Custom dashboards</span>
+          <span>Cost tracking</span><span>Conversion quality reports</span>
         </div>
       </div>
     </section>
