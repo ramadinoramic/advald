@@ -350,10 +350,10 @@
         typeWord.textContent = words[wi].slice(0, ci);
         if (ci === words[wi].length) { deleting = true; }
       }
-      // pause longer at full word, quick while deleting
-      const delay = !deleting && ci === words[wi].length ? 1800
-                  : deleting && ci === 0 ? 350
-                  : deleting ? 55 : 110;
+      // pause longer at full word, slower overall typing/deleting
+      const delay = !deleting && ci === words[wi].length ? 2800
+                  : deleting && ci === 0 ? 600
+                  : deleting ? 110 : 165;
       setTimeout(tick, delay);
     };
     setTimeout(tick, 1600); // let the hero settle first
