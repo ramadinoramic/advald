@@ -145,10 +145,10 @@
     }
   }
 
-  /* ---- Animated particle mesh (hero visual) ---- */
-  const canvas = document.getElementById('meshCanvas');
+  /* ---- Animated particle mesh (any canvas[data-mesh]) ---- */
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (canvas && canvas.getContext) {
+  document.querySelectorAll('canvas[data-mesh]').forEach((canvas) => {
+    if (!canvas.getContext) return;
     const ctx = canvas.getContext('2d');
     // Two-tone palette in the Advald brand teal family. ALPHA is swapped per draw.
     const TEAL = 'rgba(31, 179, 154, ALPHA)';   // brand teal (matches --accent)
@@ -302,8 +302,8 @@
       resizeTimer = setTimeout(resize, 150);
     });
 
-    // The canvas is a non-interactive background, so listen on the hero itself.
-    const heroEl = canvas.closest('.hero') || canvas.parentElement;
+    // The canvas is a non-interactive background, so listen on its section.
+    const heroEl = canvas.closest('section') || canvas.parentElement;
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (heroEl) {
       // Pointer attraction only on hover-capable devices (skips touch to save mobile CPU)
@@ -330,5 +330,32 @@
         firePulse(nearest);
       });
     }
+  });
+
+  /* ---- Headline typing effect: cycle the last word ---- */
+  const typeWord = document.getElementById('typeWord');
+  if (typeWord && !reduceMotion) {
+    const words = ['Scale', 'Success'];
+    let wi = 0;            // current word index
+    let ci = words[0].length; // start fully typed ("Scale" already in HTML)
+    let deleting = true;
+    const tick = () => {
+      const current = words[wi];
+      if (deleting) {
+        ci--;
+        typeWord.textContent = current.slice(0, ci);
+        if (ci === 0) { deleting = false; wi = (wi + 1) % words.length; }
+      } else {
+        ci++;
+        typeWord.textContent = words[wi].slice(0, ci);
+        if (ci === words[wi].length) { deleting = true; }
+      }
+      // pause longer at full word, quick while deleting
+      const delay = !deleting && ci === words[wi].length ? 1800
+                  : deleting && ci === 0 ? 350
+                  : deleting ? 55 : 110;
+      setTimeout(tick, delay);
+    };
+    setTimeout(tick, 1600); // let the hero settle first
   }
 })();
